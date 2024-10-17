@@ -1,0 +1,125 @@
+ejercicio 2/////
+# Crear el proyecto con Create React App usando TypeScript
+npx create-react-app react-app --template typescript
+cd react-app
+////////
+import React, { useState, useEffect, useContext, useReducer, useMemo, useCallback, useRef } from "react";
+
+// Definición de tipo para los datos simulados
+interface DataItem {
+  id: number;
+  value: number;
+}
+
+// Contexto global para manejar el estado de los datos
+const DataContext = React.createContext<DataItem[]>([]);
+
+const dataReducer = (state: DataItem[], action: { type: string; payload?: any }) => {
+  switch (action.type) {
+    case "ADD_DATA":
+      return [...state, action.payload];
+    case "RESET":
+      return [];
+    default:
+      return state;
+  }
+};
+
+// Hook personalizado para generar datos simulados
+const useDataGenerator = (interval: number): DataItem[] => {
+  const [data, setData] = useState<DataItem[]>([]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const newData = { id: Date.now(), value: Math.floor(Math.random() * 100) };
+      setData((prevData) => [...prevData, newData]);
+    }, interval);
+
+    return () => clearInterval(intervalId);
+  }, [interval]);
+
+  return data;
+};
+
+// Componente principal
+const App: React.FC = () => {
+  const [filter, setFilter] = useState<number>(50);
+  const [state, dispatch] = useReducer(dataReducer, []);
+  const dataRef = useRef<DataItem[]>([]);
+  
+  // Generar datos nuevos usando el Hook personalizado
+  const generatedData = useDataGenerator(2000);
+
+  // Actualizar el estado global cuando se generan nuevos datos
+  useEffect(() => {
+    generatedData.forEach((item) => dispatch({ type: "ADD_DATA", payload: item }));
+  }, [generatedData]);
+
+  // Filtrar los datos
+  const filteredData = useMemo(() => {
+    return state.filter((item) => item.value > filter);
+  }, [state, filter]);
+
+  // Usar useCallback para evitar renders innecesarios
+  const handleReset = useCallback(() => {
+    dispatch({ type: "RESET" });
+  }, []);
+
+  // useRef para mantener los datos previos
+  dataRef.current = state;
+
+  return (
+    <div>
+      <h1>Simulación de Datos en Tiempo Real</h1>
+      <div>
+        <label>Filtrar por valor mayor a: </label>
+        <input
+          type="number"
+          value={filter}
+          onChange={(e) => setFilter(Number(e.target.value))}
+        />
+        <button onClick={handleReset}>Resetear Datos</button>
+      </div>
+      <h2>Datos Actuales:</h2>
+      <ul>
+        {filteredData.map((item) => (
+          <li key={item.id}>
+            ID: {item.id} - Valor: {item.value}
+          </li>
+        ))}
+      </ul>
+      <h3>Logs de Ciclo de Vida:</h3>
+      <ul>
+        {state.map((item) => (
+          <li key={item.id}>
+            ID: {item.id} - Valor: {item.value}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default App;
+//////////
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["src"]
+}
+////////////
+npm install
