@@ -16,3 +16,7 @@ server.get("/components/weather", function (req: Request, res: Response): void {
 server.listen(port, function (): void {
   console.log("Escuchando en el puerto " + port);
 });
+
+//////
+eliminar node-modeles
+rm rf node modules
