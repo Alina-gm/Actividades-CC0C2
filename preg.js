@@ -1,149 +1,85 @@
-ejercicio///
-
-# Comandos para crear el proyecto
-mkdir preg6
-cd preg6
-mkdir src
-touch tsconfig.json
-touch src/eventLoopSimulation.ts
-/////////
-{
-  "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "outDir": "./dist"
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-///////////
-// Definición de tipos y clases usando TypeScript avanzado
-
-// Tipo Task para representar una tarea en el Event Loop
-interface Task {
+interface Tarea {
     id: number;
-    description: string;
-    executed: boolean;
+    descripcion: string;
+    ejecutada: boolean;
 }
 
-// Utility Types
-type PartialTask = Partial<Task>;
-type ReadonlyTask = Readonly<Task>;
+type TareaParcial = Partial<Tarea>;
+type TareaSoloLectura = Readonly<Tarea>;
 
-// Clase base abstracta para manejar las tareas
-abstract class BaseTask {
-    constructor(public description: string) {}
-
-    abstract execute(): void;
+abstract class TareaBase {
+    constructor(public descripcion: string) {}
+    abstract ejecutar(): void;
 }
 
-// Simulación de una macrotarea (setTimeout)
-class MacroTask extends BaseTask {
-    constructor(public description: string, private delay: number) {
-        super(description);
+class MacroTarea extends TareaBase {
+    constructor(public descripcion: string, private retraso: number) {
+        super(descripcion);
     }
 
-    execute(): void {
+    ejecutar(): void {
         setTimeout(() => {
-            console.log(`Macrotarea ejecutada: ${this.description}`);
-        }, this.delay);
+            console.log(`Macrotarea ejecutada: ${this.descripcion}`);
+        }, this.retraso);
     }
 }
 
-// Simulación de una microtarea (process.nextTick)
-class MicroTask extends BaseTask {
-    execute(): void {
+class MicroTarea extends TareaBase {
+    ejecutar(): void {
         process.nextTick(() => {
-            console.log(`Microtarea ejecutada: ${this.description}`);
+            console.log(`Microtarea ejecutada: ${this.descripcion}`);
         });
     }
 }
 
-// Simulación de promesas como microtareas
-class PromiseTask extends BaseTask {
-    async execute(): Promise<void> {
-        const promise = new Promise<void>((resolve) => {
-            console.log("Inicio de tarea Promise");
-            resolve();
+class PromesaTarea extends TareaBase {
+    async ejecutar(): Promise<void> {
+        const promesa = new Promise<void>((resolver) => {
+            console.log("Inicio de tarea Promesa");
+            resolver();
         });
-        await promise;
-        console.log(`Promise ejecutada: ${this.description}`);
+        await promesa;
+        console.log(`Promesa ejecutada: ${this.descripcion}`);
     }
 }
 
-// Manejador de tareas
-class TaskManager {
-    private tasks: Task[] = [];
-
-    addTask(task: PartialTask): void {
-        if (!task.description) {
+class AdministradorTareas {
+    private tareas: Tarea[] = [];
+    agregarTarea(tarea: TareaParcial): void {
+        if (!tarea.descripcion) {
             console.log("Tarea inválida");
         } else {
-            this.tasks.push({ ...task, id: this.tasks.length + 1, executed: false } as Task);
-            console.log(`Tarea agregada: ${task.description}`);
+            this.tareas.push({ ...tarea, id: this.tareas.length + 1, ejecutada: false } as Tarea);
+            console.log(`Tarea agregada: ${tarea.descripcion}`);
         }
     }
-
-    executeAll(): void {
-        this.tasks.forEach((task) => {
-            task.executed = true;
-            console.log(`Ejecutando tarea: ${task.description}`);
+    ejecutarTodas(): void {
+        this.tareas.forEach((tarea) => {
+            tarea.ejecutada = true;
+            console.log(`Ejecutando tarea: ${tarea.descripcion}`);
         });
     }
 }
 
-// Simulación del Event Loop
-const simulateEventLoop = async () => {
+const simularEventLoop = async () => {
     console.log("Inicio de la simulación del Event Loop...");
-
-    // Crear tareas de diferentes tipos
-    const macroTask = new MacroTask("Tarea pesada", 1000);
-    const microTask = new MicroTask("Tarea rápida");
-    const promiseTask = new PromiseTask("Tarea Promise");
-
-    // Ejecutar las tareas
-    macroTask.execute();
-    microTask.execute();
-    await promiseTask.execute();
-
+    const macroTarea = new MacroTarea("Tarea pesada", 1000);
+    const microTarea = new MicroTarea("Tarea rápida");
+    const promesaTarea = new PromesaTarea("Tarea Promesa");
+    macroTarea.ejecutar();
+    microTarea.ejecutar();
+    await promesaTarea.ejecutar();
     console.log("Fin de la simulación del Event Loop.");
 };
 
-// Función principal que maneja todo el proceso
-const main = async () => {
+const principal = async () => {
     console.log("Simulación del Event Loop y manejo de tareas con POO...");
-
-    // Crear instancia del manejador de tareas
-    const taskManager = new TaskManager();
-
-    // Agregar tareas al manejador
-    taskManager.addTask({ description: "Primera tarea" });
-    taskManager.addTask({ description: "Segunda tarea" });
-    taskManager.addTask({ description: undefined });  // Ejemplo de tarea inválida
-
-    // Ejecutar todas las tareas
-    taskManager.executeAll();
-
-    // Simulación del Event Loop
-    await simulateEventLoop();
+    const administrador = new AdministradorTareas();
+    administrador.agregarTarea({ descripcion: "Primera tarea" });
+    administrador.agregarTarea({ descripcion: "Segunda tarea" });
+    administrador.agregarTarea({ descripcion: undefined });
+    administrador.ejecutarTodas();
+    await simularEventLoop();
 };
 
-// Ejecutar la simulación
-main();
-////////////
-node dist/eventLoopSimulation.js
-////////
-Simulación del Event Loop y manejo de tareas con POO...
-Tarea agregada: Primera tarea
-Tarea agregada: Segunda tarea
-Tarea inválida
-Ejecutando tarea: Primera tarea
-Ejecutando tarea: Segunda tarea
-Inicio de la simulación del Event Loop...
-Microtarea ejecutada: Tarea rápida
-Inicio de tarea Promise
-Fin de la simulación del Event Loop.
-Promise ejecutada: Tarea Promise
-Macrotarea ejecutada: Tarea pesada
+principal();
