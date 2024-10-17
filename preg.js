@@ -16,4 +16,3 @@ server.get("/components/weather", function (req: Request, res: Response): void {
 server.listen(port, function (): void {
   console.log("Escuchando en el puerto " + port);
 });
-https://github.com/Alina-gm/Actividades-CC0C2.git
